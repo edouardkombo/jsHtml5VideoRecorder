@@ -9,7 +9,7 @@ if((window.chrome !== null) && (window.navigator.vendor === "Google Inc.")) {
 var jsVideoRecorder = new jsHtml5VideoRecorder();
 
 /***************************************************
-	Init Html5 Audio Streaming
+	Init Html5 Video Streaming
 ***************************************************/
 jsVideoRecorder.whammy                      = Whammy; //Whammy object from https://github.com/antimatter15/whammy
 jsVideoRecorder.width                       = '640';
