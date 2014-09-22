@@ -20,12 +20,12 @@ It works perfectly and only on Google Chrome.
     
 
     //Set Parameters
-    jsVideoRecorder.whammy                      = Whammy;
+    jsVideoRecorder.whammy                      = Whammy; //Whammy object from https://github.com/antimatter15/whammy
     jsVideoRecorder.width                       = '640';
     jsVideoRecorder.height                      = '480';
     jsVideoRecorder.videoTagIdHost              = 'media'; //Html tag where is contained the media (video or tag)
-    jsVideoRecorder.videoId                     = 'video';
-    jsVideoRecorder.canvasId                    = 'canvas';
+    jsVideoRecorder.videoTagId                  = 'video';
+    jsVideoRecorder.canvasTagId                 = 'canvas';
     jsVideoRecorder.maxRecordTime               = 30;      //Maximum time of the recorded
     jsVideoRecorder.videoFormat                 = '.webm';    
     jsVideoRecorder.hideWebcamWhileRecording    = true; //Hide webcam while recording, strongly improves performance

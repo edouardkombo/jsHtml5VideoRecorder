@@ -77,9 +77,18 @@ jsHtml5VideoRecorder.prototype = {
     {   
         this.mediaStream = stream;
         
+        this.resetTags();
+       
+    },
+    
+    /**
+     * Common method
+     */
+    resetTags: function()
+    {
         //Create video and canvas tag if not exists
-        this.createTag(this.videoId);
-        this.createTag(this.canvasId);        
+        this.createTag(this.videoTagId);
+        this.createTag(this.canvasTagId);         
     },
     
     /**
@@ -165,9 +174,12 @@ jsHtml5VideoRecorder.prototype = {
     startRecording: function ()
     {
         //Remove video tag and recreate it to empty cache
-        document.getElementById('video').remove();   
-        this.createTag(this.videoId);
-        this.createTag(this.canvasId);
+        var videoElement = document.getElementById(this.videoTagId);   
+        if (videoElement) {
+            videoElement.remove();
+        }
+        
+        this.resetTags();
         
         if (this.hideWebcamWhileRecording) {
             //Hide video stream while recording for performance

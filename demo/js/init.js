@@ -11,7 +11,7 @@ var jsVideoRecorder = new jsHtml5VideoRecorder();
 /***************************************************
 	Init Html5 Audio Streaming
 ***************************************************/
-jsVideoRecorder.whammy                      = Whammy;
+jsVideoRecorder.whammy                      = Whammy; //Whammy object from https://github.com/antimatter15/whammy
 jsVideoRecorder.width                       = '640';
 jsVideoRecorder.height                      = '480';
 jsVideoRecorder.videoTagIdHost              = 'media';
