@@ -53,3 +53,4 @@ $RECYCLE.BIN/
 *.msi
 *.msm
 *.msp
+/HTML5Application/nbproject/private/
