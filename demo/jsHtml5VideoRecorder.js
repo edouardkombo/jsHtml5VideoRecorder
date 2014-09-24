@@ -258,7 +258,7 @@ jsHtml5VideoRecorder.prototype = {
             this.stream(webmBlob);
 
         } else if (method === 'saveAndDownload') {
-            this.save(this.webmBlob, false);
+            this.save(webmBlob, false);
             this.download(webmBlob, false);
                       
         } else if (method === 'saveAndStream') {
