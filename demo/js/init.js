@@ -43,5 +43,9 @@ function startRecording() {
  * You can use "save", "saveAndDownload" or "saveAndStream", "downloadAndStream" parameters
  */
 function stopRecording() {
-    jsVideoRecorder.stopRecording('saveAndStream');
+    //For demo
+    jsVideoRecorder.stopRecording('downloadAndStream');
+
+    //Use this on production
+    //jsVideoRecorder.stopRecording('saveAndStream');
 }
