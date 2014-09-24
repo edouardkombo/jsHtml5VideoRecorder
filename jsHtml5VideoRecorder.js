@@ -36,7 +36,11 @@ jsHtml5VideoRecorder.prototype = {
     mediaPath: '',    
     phpFile: '',
     videoTagIdHost: '',
+    resultTagIdHost: '',    
+    resultTagId: '',
+    showStreamOnFinish: '',
     hideWebcamWhileRecording: true,
+    videoLink: '',
     
     /**
      * Get Proper html5 getUsermedia from window.navigator object, depending on the browser
@@ -87,67 +91,46 @@ jsHtml5VideoRecorder.prototype = {
     resetTags: function()
     {
         //Create video and canvas tag if not exists
-        this.createTag(this.videoTagId);
-        this.createTag(this.canvasTagId);         
+        this.createTag('video', this.videoTagId);
+        this.createTag('canvas', this.canvasTagId);         
     },
     
     /**
      * Create html tag inside html document (video, canvas)
      * 
      * @param {String} tag
+     * @param {String} tagId
      * @returns {jsHtml5Webcam.prototype@pro;videoTagmyTag|jsHtml5Webcam.prototype.createTag.myTag|jsHtml5Webcam.prototype.createTag.thisTag|Element}
      */
-    createTag: function(tag) 
-    {           
-        var myTag   = document.getElementById(tag);
-        
+    createTag: function(tag, tagId) 
+    {
+        var myTag   = document.getElementById(tagId);
+       
         if (myTag === null) {
             
             myTag = document.createElement(tag);
             
             if (tag === 'canvas') {
-                this.ctx                = myTag.getContext('2d');
                 myTag.width             = this.width;
                 myTag.height            = this.height;
+                myTag.id                = tagId;
                 myTag.style.position    = 'absolute';
                 myTag.style.visibility  = 'hidden';
-                myTag.id                = tag;
-                this.canvasTag          = myTag;
+                this.ctx                = myTag.getContext('2d');
+                this.canvasTag          = this.ctx.canvas;
             
             } else if (tag === 'video') {    
                 myTag.setAttribute('autoplay','true');
                 myTag.width             = this.width;
                 myTag.height            = this.height;
-                myTag.id                = tag;
+                myTag.id                = tagId;
                 if (this.mediaStream !== '') {
                     myTag.src = window.URL.createObjectURL(this.mediaStream);
                 }
                 this.videoTag   = myTag;
-            }        
-            document.getElementById(this.videoTagIdHost).appendChild(myTag);    
-        
-        } else {
-            
-            myTag.id = tag;
-            
-            if (tag === 'video') {
-                this.videoTag = myTag;
-                this.videoTag.setAttribute('autoplay','true');
-                this.videoTag.width   = this.width;
-                this.videoTag.height  = this.height;
-                if (this.mediaStream !== '') {
-                    this.videoTag.src = window.URL.createObjectURL(this.mediaStream);
-                }            
-                return this.videoTag;
-
-            } else if (tag === 'canvas') {
-                this.ctx       = myTag.getContext('2d');            
-                this.canvasTag = myTag;
-                this.canvasTag.width   = this.width;
-                this.canvasTag.height  = this.height;            
-                this.canvasTag.style.position   = 'absolute'; 
-                return this.canvasTag;            
             }
+            
+            document.getElementById(this.videoTagIdHost).appendChild(myTag);    
         }
     },                
     
@@ -174,7 +157,7 @@ jsHtml5VideoRecorder.prototype = {
     startRecording: function ()
     {
         //Remove video tag and recreate it to empty cache
-        var videoElement = document.getElementById(this.videoTagId);   
+        var videoElement = document.getElementById(this.resultTagId);   
         if (videoElement) {
             videoElement.remove();
         }
@@ -183,8 +166,7 @@ jsHtml5VideoRecorder.prototype = {
         
         if (this.hideWebcamWhileRecording) {
             //Hide video stream while recording for performance
-            this.videoTag.style.visibility  = 'hidden';
-            this.videoTag.style.display     = 'none';
+            this.showHideStream('hide');
         }
 
         this.hasStopped = false;
@@ -198,6 +180,24 @@ jsHtml5VideoRecorder.prototype = {
 
         return true;        
     },
+    
+    
+    /**
+     * Show or hide video stream on demand
+     * 
+     * @param {String} status
+     * @returns {undefined}
+     */
+    showHideStream: function(status)
+    {
+        if (status === 'show') {
+            this.videoTag.style.visibility  = 'visible';
+            this.videoTag.style.display     = 'block';            
+        } else if (status === 'hide') {
+            this.videoTag.style.visibility  = 'hidden';
+            this.videoTag.style.display     = 'none';           
+        }
+    },    
     
     /**
      * Stop video record and triggers specific methods
@@ -250,17 +250,30 @@ jsHtml5VideoRecorder.prototype = {
         
         if (method === 'save') {
             this.save(webmBlob, false);
+            
         } else if (method === 'download') {
-            this.downmload(webmBlob, false);
+            this.download(webmBlob, false);
+            
         } else if (method === 'stream') {
             this.stream(webmBlob);
+
+        } else if (method === 'saveAndDownload') {
+            this.save(this.webmBlob, false);
+            this.download(webmBlob, false);
+                      
         } else if (method === 'saveAndStream') {
             this.save(webmBlob, true);
+            
         } else if (method === 'downloadAndStream') {
             this.download(webmBlob, true);
+            
         } else {
             this.save(webmBlob, false);
         }
+        
+        if (this.showStreamOnFinish) {
+            this.showHideStream('show');
+        }         
         
         //Empty frames for next video capture
         this.frames = [];
@@ -277,7 +290,7 @@ jsHtml5VideoRecorder.prototype = {
      */
     save: function (blob, stream) {
          
-        var datas   = 'path='+this.mediaPath+'&format='+this.videoFormat;                  
+        var datas   = 'path='+this.mediaPath+'&extension='+this.videoExtension;                  
 
         var client = new XMLHttpRequest();
         client.onreadystatechange = function() 
@@ -285,6 +298,10 @@ jsHtml5VideoRecorder.prototype = {
             if (client.readyState === 4 && client.status === 200) 
             {
                 console.log(client.response);
+                
+                //Get the video link, so we can use it later in other scripts
+                this.videoLink = client.response;
+                
                 if (stream) {
                     this.stream(blob);
                 }
@@ -319,7 +336,7 @@ jsHtml5VideoRecorder.prototype = {
         //Define link attributes
         hf.href             = url;
         hf.id               = temporaryId;
-        hf.download         = temporaryId + this.videoFormat;
+        hf.download         = temporaryId + '.' + this.videoExtension;
         hf.innerHTML        = hf.download;
         hf.style.display    = 'none';
         hf.style.visibility = 'hidden';
@@ -345,12 +362,14 @@ jsHtml5VideoRecorder.prototype = {
         
         var url             = window.URL.createObjectURL(blob);
         
-        this.videoTag.style.visibility  = 'visible';
-        this.videoTag.style.display     = 'block';       
-        this.videoTag.src               = url;
-        this.videoTag.setAttribute('autoplay', false);         
-        this.videoTag.setAttribute('controls', true);
-        this.videoTag.pause();
+        var videoResult = document.createElement('video');
+        videoResult.src = url;
+        videoResult.setAttribute('autoplay', false);         
+        videoResult.setAttribute('controls', true);        
+        videoResult.id  = this.resultTagId;
         
+        document.getElementById(this.resultTagIdHost).appendChild(videoResult);
+        
+        videoResult.pause();        
     }    
 };
